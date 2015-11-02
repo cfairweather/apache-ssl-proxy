@@ -1,0 +1,24 @@
+
+apache_proxy_ssl:
+  build: apache_proxy_ssl
+  container_name: example_apache_proxy_ssl
+  links:
+  - monitor
+  ports:
+  - "80:80"
+  - "443:443"
+  restart: always
+  volumes:
+  - "./apache_proxy_ssl/config:/etc/apache2/sites-enabled"
+  - "./apache_proxy_ssl/ssl:/etc/apache2/ssl"
+
+
+monitor:
+  image: google/cadvisor:latest
+  container_name: example_monitor
+  volumes:
+  - "/:/rootfs:ro"
+  - "/var/run:/var/run:rw"
+  - "/sys:/sys:ro"
+  - "/var/lib/docker/:/var/lib/docker:ro"
+  detach: true

@@ -1,0 +1,93 @@
+<html>
+<head>
+	<title>Successful Connection to Apache Proxy Docker container</title>
+	<style type="text/css">
+	@import url('//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
+	 
+	.isa_info, .isa_success, .isa_warning, .isa_error {
+	margin: 10px 0px;
+	padding:12px;
+	}
+	.isa_success {
+	    color: #4F8A10;
+	    background-color: #DFF2BF;
+	}
+	#main{
+		width:700px; 
+		padding-top: 40px;
+		margin:0 auto;
+	}
+	</style>
+</head>
+<body>
+	<div id="main">
+		<div class="isa_success"> <i class="fa fa-check"> </i> You've successfully connected to the Apache proxy Docker container!</div>
+		<h3>Configuration</h3>
+		<p>However, you still need use the <code>volumes:</code> property in a docker-compose.yml to map these files to the container:</p>
+		<ul>
+			<li>default.conf</li>
+			<li>crt.crt</li>
+			<li>key.key</li>
+		</ul>
+		<p>Make sure to use <code>/etc/apache2/ssl/</code> to refer to any certificates in keys in your default.conf </p>
+
+
+
+		<hr>
+		<h4>Example <code>docker-compose.yml</code></h4>
+		<p>Then, your docker-compose.yml could have the following entries:</p>
+		<pre>
+apache_proxy_ssl:
+  build: apache_proxy_ssl
+  container_name: apache_proxy_ssl
+  ports:
+  - "80:80"
+  - "443:443"
+  restart: always
+  volumes:
+  - "./myconfig:/etc/apache2/sites-enabled"
+  - "./mycerts:/etc/apache2/ssl"
+		</pre>
+		<p>Don't forget that you can link directly to other containers, here, and use the "othercontainer" hostname in your <code>default.conf</code> </p>
+		<pre>
+apache_proxy_ssl:
+  ...
+  links:
+  - othercontainer
+		</pre>
+
+		<br>
+		<p>OR include the following options when running the container:</p>
+		<pre>docker run apache_proxy_ssl -v ./myconfig:/etc/apache2/sites-enabled -v ./mycerts:/etc/apache2/ssl /docker-entrypoint.sh</pre>
+
+
+		<hr>
+		<h4>Example <code>default.conf</code></h4>
+		<p>You could include something like the following for your proxying:</p>
+		<pre>
+&lt;VirtualHost *:80&gt;
+  ServerName my.domain.name
+
+  ProxyPass / http://www.steam.com:80/
+  ProxyPassReverse / http://www.steam.com:80/
+&lt;/VirtualHost&gt;
+
+
+&lt;VirtualHost *:443&gt;
+  ServerName my.domain.name
+  SSLEngine on
+  SSLCertificateFile /etc/apache2/ssl/cert.crt
+  SSLCertificateKeyFile /etc/apache2/ssl/key.key
+
+  
+  ProxyPass / http://www.steam.com:80/
+  ProxyPassReverse / http://www.steam.com:80/
+
+&lt;/VirtualHost&gt;
+
+		</pre>
+
+	</div>
+	
+</body>
+</html>
